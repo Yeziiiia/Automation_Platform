@@ -4,7 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="07e61244-add9-4d5a-8b35-0881944b7257" name="更改" comment="没开发完" />
+    <list default="true" id="07e61244-add9-4d5a-8b35-0881944b7257" name="更改" comment="删除模拟数据">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cases/device_detector.py" beforeDir="false" afterPath="$PROJECT_DIR$/cases/device_detector.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cases/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/cases/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cases/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/cases/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cases/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/cases/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/cases/css/cases.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/cases/css/cases.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/cases/case_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/cases/case_list.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -95,7 +104,7 @@
       <option name="presentableId" value="Default" />
       <updated>1760496219916</updated>
       <workItem from="1760496221581" duration="6578000" />
-      <workItem from="1760509820924" duration="7248000" />
+      <workItem from="1760509820924" duration="12498000" />
     </task>
     <task id="LOCAL-00001" summary="第一次upload">
       <option name="closed" value="true" />
@@ -137,7 +146,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760516642143</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="删除模拟数据">
+      <option name="closed" value="true" />
+      <created>1760517470078</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1760517470078</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -147,6 +164,7 @@
     <MESSAGE value="第一次upload" />
     <MESSAGE value="# 这里有两端重复代码，单纯用来模拟，先提交，后续记得查看注释" />
     <MESSAGE value="没开发完" />
-    <option name="LAST_COMMIT_MESSAGE" value="没开发完" />
+    <MESSAGE value="删除模拟数据" />
+    <option name="LAST_COMMIT_MESSAGE" value="删除模拟数据" />
   </component>
 </project>
