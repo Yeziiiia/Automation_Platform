@@ -4,9 +4,15 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.conf import settings
 import os
+import zipfile
+import tempfile
+from datetime import datetime
 from .models import TestCase
-from .forms import TestCaseUploadForm, TestCaseEditForm
+from .forms import TestCaseUploadForm, TestCaseEditForm, RunTestCaseForm
+from .device_detector import get_connected_devices
+from tasks.models import Task, TaskDeviceResult
 
 def case_list(request):
     """用例管理首页"""
@@ -205,10 +211,128 @@ def delete_test_case(request, case_id):
             })
         messages.error(request, f"删除失败：{str(e)}")
         return redirect('cases:case_list')
+def run_test_case(request, case_id):
+    """运行测试用例"""
+    test_case = get_object_or_404(TestCase, id=case_id)
+
+    if request.method == 'POST':
+        # 获取可用设备列表来初始化表单
+        connected_devices = get_connected_devices()
+        device_choices = [(d['device_id'], f"{d['name']} ({d['device_id']})") for d in connected_devices]
+
+        form = RunTestCaseForm(request.POST, request.FILES, device_choices=device_choices)
+
+        if form.is_valid():
+            try:
+                # 获取选中的设备
+                selected_devices = form.cleaned_data['devices']
+                app_file = form.cleaned_data['app_file']
+
+                # 确定平台类型
+                file_extension = os.path.splitext(app_file.name)[1].lower()
+                platform = 'android' if file_extension == '.apk' else 'ios'
+
+                # 保存应用文件到临时目录
+                upload_dir = os.path.join('uploads', 'apps')
+                os.makedirs(upload_dir, exist_ok=True)
+
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                app_filename = f"{timestamp}_{app_file.name}"
+                app_file_path = os.path.join(upload_dir, app_filename)
+
+                with open(app_file_path, 'wb+') as destination:
+                    for chunk in app_file.chunks():
+                        destination.write(chunk)
+
+                # 创建任务
+                task = Task.objects.create(
+                    name=f"{test_case.name} - {app_file.name}",
+                    test_case=test_case,
+                    devices=selected_devices,
+                    app_file=app_file_path,
+                    platform=platform,
+                    status='pending'
+                )
+
+                # 为每个设备创建任务结果记录
+                device_map = {d['device_id']: d for d in connected_devices}
+
+                for device_id in selected_devices:
+                    device_info = device_map.get(device_id)
+
+                    # 确保device_info有name字段，如果没有则使用默认值
+                    device_name = device_info.get('name', f"Device ({device_id[:8]}...)") if device_info else f"Device ({device_id[:8]}...)"
+
+                    TaskDeviceResult.objects.create(
+                        task=task,
+                        device_id=device_id,
+                        device_name=device_name,
+                        status='pending'
+                    )
+
+                # 启动异步任务执行
+                from tasks.views import execute_task_async
+                execute_task_async(task.id)
+
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': True,
+                        'message': f"任务创建成功！任务ID: {task.id}",
+                        'task_id': task.id,
+                        'redirect_url': '/tasks/'
+                    })
+
+                messages.success(request, f"任务创建成功！任务ID: {task.id}")
+                return redirect('tasks:running_tasks')
+
+            except Exception as e:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False,
+                        'message': f"创建任务失败：{str(e)}"
+                    })
+                messages.error(request, f"创建任务失败：{str(e)}")
+        else:
+            error_messages = []
+            for field, errors in form.errors.items():
+                for error in errors:
+                    error_messages.append(error)
+
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'message': f"创建任务失败：{'; '.join(error_messages)}"
+                })
+    else:
+        # GET请求不需要表单，因为这个功能现在通过弹窗实现
+        return redirect('cases:case_list')
+
+def get_test_case_api(request, case_id):
+    """获取测试用例详细信息的API"""
+    try:
+        test_case = get_object_or_404(TestCase, id=case_id)
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'test_case': {
+                    'id': test_case.id,
+                    'name': test_case.name,
+                    'file_type': test_case.file_type,
+                    'file_type_display': test_case.get_file_type_display(),
+                    'file_size_display': test_case.get_file_size_display(),
+                    'upload_time': test_case.upload_time.strftime('%Y/%m/%d %H:%M:%S'),
+                    'status': test_case.status,
+                    'status_display': test_case.get_status_display()
+                }
+            })
+        else:
+            return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 def device_status(request):
     """设备管理子页面"""
-
     from .device_detector import get_connected_devices, get_device_stats
 
     # 自动检测已连接的设备
