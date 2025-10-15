@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+# 这里有两端重复代码，单纯用来模拟，先提交，后续记得查看注释
+
 def case_list(request):
     """用例管理首页"""
     # 模拟数据 - 扩展更多数据用于测试分页
