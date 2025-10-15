@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}首页{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block banner %}
+<section class="banner">
+    <h1>欢迎来到自动化管理平台</h1>
+    <p>这是一个功能强大的自动化测试平台</p>
+</section>
+{% endblock %}
+
+{% block content %}
+<section class="home-cards">
+    <div class="home-card">
+        {# 自动化测试齿轮 #}
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon">
+            <rect width="64" height="64" rx="12" fill="#e0e7ff"/>
+            <path d="M32 24v16m-8-8h16" stroke="#6c7fd9" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <h3>自动化测试</h3>
+        <p>支持 Airtest 脚本执行</p>
+    </div>
+
+    <div class="home-card">
+        {# 数据分析折线 #}
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon">
+            <rect width="64" height="64" rx="12" fill="#e0e7ff"/>
+            <path d="M20 44h24M26 36l4 4 8-8" stroke="#6c7fd9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="44" cy="20" r="4" fill="#6c7fd9"/>
+        </svg>
+        <h3>数据分析</h3>
+        <p>实时生成测试报告</p>
+    </div>
+
+    <div class="home-card">
+        {# 团队协作多人 #}
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon">
+            <rect width="64" height="64" rx="12" fill="#e0e7ff"/>
+            <circle cx="24" cy="22" r="4" fill="#6c7fd9"/>
+            <circle cx="40" cy="22" r="4" fill="#6c7fd9"/>
+            <circle cx="32" cy="36" r="6" fill="#6c7fd9"/>
+        </svg>
+        <h3>团队协作</h3>
+        <p>支持多人协作管理</p>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,99 @@
+<!-- 设备状态大弹窗 -->
+<div class="modal fade" id="deviceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-wider modal-dialog-centered">
+    <div class="modal-content shadow-lg rounded-4">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-primary">设备状态</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+      </div>
+      <div class="modal-body">
+        <!-- 统计卡片 -->
+        <div class="row g-3 mb-4">
+          <div class="col">
+            <div class="card stat-card-modal">
+              <div class="card-body text-center">
+                <div class="display-6 fw-bold text-primary">{{ stats.total }}</div>
+                <div class="text-muted">设备总数</div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card stat-card-modal">
+              <div class="card-body text-center">
+                <div class="display-6 fw-bold text-success">{{ stats.online }}</div>
+                <div class="text-muted">在线设备</div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card stat-card-modal">
+              <div class="card-body text-center">
+                <div class="display-6 fw-bold text-warning">{{ stats.offline }}</div>
+                <div class="text-muted">离线设备</div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card stat-card-modal">
+              <div class="card-body text-center">
+                <div class="display-6 fw-bold text-info">{{ stats.android }}</div>
+                <div class="text-muted">Android 设备</div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card stat-card-modal">
+              <div class="card-body text-center">
+                <div class="display-6 fw-bold text-secondary">{{ stats.ios }}</div>
+                <div class="text-muted">iOS 设备</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 设备表格 -->
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>设备名称</th>
+                <th>设备ID</th>
+                <th>系统版本</th>
+                <th>连接状态</th>
+                <th>连接类型</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for device in devices %}
+              <tr>
+                <td>{{ device.name }}</td>
+                <td><small>{{ device.device_id }}</small></td>
+                <td>{{ device.os }}</td>
+                <td>
+                  {% if device.status == "在线" %}
+                    <span class="badge bg-success rounded-pill">在线</span>
+                  {% else %}
+                    <span class="badge bg-secondary rounded-pill">离线</span>
+                  {% endif %}
+                </td>
+                <td>{{ device.conn }}</td>
+                <td>
+                  {% if device.status == "在线" %}
+                    <button class="btn btn-sm btn-outline-primary rounded-pill">调试</button>
+                  {% else %}
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill" disabled>调试</button>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary rounded-pill px-3" data-bs-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>

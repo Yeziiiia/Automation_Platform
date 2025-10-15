@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}设备状态{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'cases/css/cases.css' %}">
+{% endblock %}
+
+{% block banner %}
+<section class="banner">
+    <h1>设备状态</h1>
+</section>
+{% endblock %}
+
+{% block content %}
+<div class="stat-cards">
+    <div class="stat-card">
+        <h2>{{ stats.total }}</h2>
+        <p>设备总数</p>
+    </div>
+    <div class="stat-card">
+        <h2>{{ stats.online }}</h2>
+        <p>在线设备</p>
+    </div>
+    <div class="stat-card">
+        <h2>{{ stats.offline }}</h2>
+        <p>离线设备</p>
+    </div>
+    <div class="stat-card">
+        <h2>{{ stats.android }}</h2>
+        <p>Android 设备</p>
+    </div>
+</div>
+
+<div class="table-header">
+    <h2>已连接设备</h2>
+    <button class="btn btn-green">刷新</button>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>设备名称</th>
+            <th>设备ID</th>
+            <th>系统版本</th>
+            <th>连接状态</th>
+            <th>连接类型</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in devices %}
+        <tr>
+            <td>{{ d.name }}</td>
+            <td>{{ d.device_id }}</td>
+            <td>{{ d.os }}</td>
+            <td><span class="status online">{{ d.status }}</span></td>
+            <td>{{ d.conn }}</td>
+            <td><button class="btn btn-blue">调试</button></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

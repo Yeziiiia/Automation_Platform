@@ -1,0 +1,149 @@
+/* 柔和现代化主样式表 */
+:root {
+    --primary: #6c7fd9;
+    --primary-dark: #5568c5;
+    --success: #4caf93;
+    --warning: #ffb74d;
+    --danger: #f4436c;
+    --bg: #f5f7fb;
+    --card-bg: #ffffff;
+    --text: #4a4a68;
+    --muted: #8f93a9;
+    --border: #e8eaf0;
+    --shadow-sm: 0 2px 8px rgba(108, 127, 217, 0.08);
+    --shadow-lg: 0 8px 24px rgba(108, 127, 217, 0.12);
+    --radius: 12px;
+}
+
+body {
+    margin: 0;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 220px;
+    height: 100vh;
+    background: var(--card-bg);
+    box-shadow: var(--shadow-sm);
+    border-right: 1px solid var(--border);
+    padding-top: 24px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0 16px;
+    margin: 0;
+}
+
+.sidebar li a {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    margin-bottom: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    border-radius: var(--radius);
+    transition: all .2s;
+}
+
+.sidebar li a:hover,
+.sidebar li a.active {
+    background: rgba(108, 127, 217, .08);
+    color: var(--primary);
+    font-weight: 500;
+}
+
+.header {
+    margin-left: 220px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* 登录按钮靠最右 */
+    padding: 0 32px;
+    background: var(--card-bg);
+    box-shadow: var(--shadow-sm);
+    border-bottom: 1px solid var(--border);
+}
+
+.logo {
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: var(--primary);
+    margin-right: auto; /* 把 logo 挤到左边 */
+}
+
+.main {
+    margin-left: 220px;
+    padding: 32px;
+}
+
+.banner {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    padding: 48px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 32px;
+}
+
+.banner h1 {
+    margin: 0 0 8px;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.banner p {
+    margin: 0;
+    opacity: .9;
+}
+
+.btn {
+    border: none;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all .2s;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+}
+
+.btn-success {
+    background: var(--success);
+    color: #fff;
+}
+
+.btn-outline-primary {
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary);
+    color: #fff;
+}
+
+.badge {
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.table-light {
+    background: var(--bg);
+}

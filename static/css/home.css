@@ -1,0 +1,43 @@
+/* 首页卡片柔和现代化样式 */
+.home-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    padding: 32px 0;
+}
+
+.home-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 32px 24px;
+    text-align: center;
+    transition: box-shadow .25s, transform .25s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.home-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+.home-card .icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 20px;
+}
+
+.home-card h3 {
+    margin: 0 0 8px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.home-card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.875rem;
+}

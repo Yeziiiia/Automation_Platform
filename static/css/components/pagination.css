@@ -1,0 +1,185 @@
+/* 固定底部分页组件样式 */
+.fixed-pagination-container {
+    position: fixed;
+    bottom: 0;
+    left: 220px; /* 与侧边栏宽度一致 */
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border);
+    padding: 16px 32px;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.fixed-pagination {
+    margin: 0;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fixed-pagination .pagination {
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.page-link {
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 2px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--muted);
+    transition: all 0.2s ease;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.page-link:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.page-item.active .page-link {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    font-weight: 500;
+}
+
+.page-item.disabled .page-link {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.pagination-info {
+    margin-left: 24px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.page-info-text {
+    white-space: nowrap;
+}
+
+/* 为固定分页预留空间，避免内容被遮挡 */
+.pagination-spacer {
+    height: 80px; /* 与固定分页容器高度一致 */
+    width: 100%;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .fixed-pagination-container {
+        left: 0;
+        padding: 12px 16px;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .pagination-info {
+        margin-left: 0;
+        font-size: 12px;
+    }
+
+    .page-link {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+
+    .pagination-spacer {
+        height: 100px;
+    }
+}
+
+/* 侧边栏收起时的样式调整 */
+.sidebar-collapsed .fixed-pagination-container {
+    left: 60px; /* 收起时的侧边栏宽度 */
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    .fixed-pagination-container {
+        background: rgba(30, 30, 40, 0.95);
+        border-top-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .page-link {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .page-link:hover {
+        background: var(--primary);
+        color: #fff;
+    }
+
+    .pagination-info {
+        color: rgba(255, 255, 255, 0.6);
+    }
+}
+
+/* 动画效果 */
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.fixed-pagination-container {
+    animation: slideUp 0.3s ease-out;
+}
+
+/* 跳转页码输入框样式 */
+.page-jump {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 16px;
+    gap: 8px;
+}
+
+.page-jump input {
+    width: 60px;
+    height: 32px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0 8px;
+    font-size: 13px;
+    text-align: center;
+}
+
+.page-jump button {
+    height: 32px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 6px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.page-jump button:hover {
+    background: var(--primary-dark);
+}

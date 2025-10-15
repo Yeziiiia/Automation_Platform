@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}任务运行{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'tasks/css/tasks.css' %}">
+{% endblock %}
+
+{% block banner %}
+<section class="banner">
+    <h1>正在运行的任务</h1>
+</section>
+{% endblock %}
+
+{% block content %}
+<div class="task-grid">
+    {% for t in tasks %}
+    <div class="task-card">
+        <div class="task-header">
+            <span class="task-name">{{ t.name }}</span>
+            <span class="task-status running">{{ t.status }}</span>
+        </div>
+        <div class="task-info">
+            <p>{{ t.devices }} 个设备</p>
+            <p>运行时间: {{ t.runtime }}</p>
+        </div>
+        <div class="progress-bar">
+            <div class="progress" style="width: {{ t.progress }}%"></div>
+        </div>
+        <button class="btn btn-blue btn-block">查看详情</button>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- 固定底部分页组件 -->
+{% include 'components/pagination.html' with page_obj=tasks aria_label='任务列表分页' %}
+{% endblock %}

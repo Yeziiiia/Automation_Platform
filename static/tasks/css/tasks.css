@@ -1,0 +1,107 @@
+/* tasks 模块柔和现代化样式 */
+.task-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.task-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow .2s;
+}
+
+.task-card:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.task-name {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text);
+}
+
+.task-status {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.task-status.running {
+    background: #d4edda;
+    color: var(--success);
+}
+
+.task-info p {
+    margin: 4px 0;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 16px 0;
+}
+
+.progress {
+    height: 100%;
+    background: var(--success);
+    transition: width .3s ease;
+}
+
+.btn-block {
+    width: 100%;
+    margin-top: auto;
+    border-radius: 20px;
+}
+
+/* 分页柔和样式 – 与 cases 页一致 */
+.pagination {
+    margin-top: 24px;
+}
+
+.page-link {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 4px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--muted);
+    transition: all .2s;
+}
+
+.page-link:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+.page-item.active .page-link {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.page-item.disabled .page-link {
+    opacity: .5;
+    cursor: default;
+}

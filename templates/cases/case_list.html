@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}用例管理{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'cases/css/cases.css' %}">
+{% endblock %}
+
+{% block banner %}
+<section class="banner">
+    <h1>用例管理</h1>
+</section>
+{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+    <button class="btn btn-success rounded-pill" data-bs-toggle="modal" data-bs-target="#deviceModal">设备状态</button>
+    <button class="btn btn-primary rounded-pill">上传用例</button>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>脚本名称</th>
+            <th>上传时间</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for case in cases %}
+        <tr>
+            <td>{{ case.name }}</td>
+            <td>{{ case.upload_time }}</td>
+            <td><span class="status unavailable">{{ case.status }}</span></td>
+            <td class="actions">
+                <button class="btn btn-blue">运行</button>
+                <button class="btn btn-gray">编辑</button>
+                <button class="btn btn-red">删除</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- 固定底部分页组件 -->
+{% include 'components/pagination.html' with page_obj=cases aria_label='用例列表分页' %}
+{% endblock %}
