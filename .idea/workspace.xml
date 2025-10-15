@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="07e61244-add9-4d5a-8b35-0881944b7257" name="更改" comment="第一次upload">
-      <change beforePath="$PROJECT_DIR$/cases/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/cases/views.py" afterDir="false" />
-    </list>
+    <list default="true" id="07e61244-add9-4d5a-8b35-0881944b7257" name="更改" comment="# 这里有两端重复代码，单纯用来模拟，先提交，后续记得查看注释" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -97,7 +95,7 @@
       <option name="presentableId" value="Default" />
       <updated>1760496219916</updated>
       <workItem from="1760496221581" duration="6578000" />
-      <workItem from="1760509820924" duration="6352000" />
+      <workItem from="1760509820924" duration="6654000" />
     </task>
     <task id="LOCAL-00001" summary="第一次upload">
       <option name="closed" value="true" />
@@ -123,7 +121,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760516284349</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="# 这里有两端重复代码，单纯用来模拟，先提交，后续记得查看注释">
+      <option name="closed" value="true" />
+      <created>1760516337642</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1760516337642</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -131,6 +137,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="第一次upload" />
-    <option name="LAST_COMMIT_MESSAGE" value="第一次upload" />
+    <MESSAGE value="# 这里有两端重复代码，单纯用来模拟，先提交，后续记得查看注释" />
+    <option name="LAST_COMMIT_MESSAGE" value="# 这里有两端重复代码，单纯用来模拟，先提交，后续记得查看注释" />
   </component>
 </project>
