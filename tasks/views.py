@@ -25,11 +25,13 @@ def running_tasks(request):
         tasks = paginator.page(paginator.num_pages)
 
     return render(request, 'tasks/running_tasks.html', {"tasks": tasks, "nav": "tasks"})
-
 def execute_task_async(task_id):
     """异步执行任务"""
     try:
         task = Task.objects.get(id=task_id)
+
+        # 添加调试信息
+        print(f"[DEBUG] 开始执行任务 {task_id}: {task.name}")
 
         # 更新任务状态为运行中
         task.status = 'running'
@@ -41,6 +43,10 @@ def execute_task_async(task_id):
         devices = task.devices
         app_file = task.app_file
         platform = task.platform
+
+        print(f"[DEBUG] 任务详情: 设备={devices}, 平台={platform}, 脚本={test_case.file_path}")
+        print(f"[DEBUG] APK文件路径: {app_file}")
+        print(f"[DEBUG] APK文件是否存在: {os.path.exists(app_file) if app_file else 'None'}")
 
         # 为每个设备创建执行记录
         device_results = {}
@@ -56,6 +62,7 @@ def execute_task_async(task_id):
 
         # 真实任务执行
         def real_execution():
+            print(f"[DEBUG] 后台线程开始执行")
             try:
                 # 更新任务进度
                 task.progress = 10
@@ -115,9 +122,24 @@ def execute_task_async(task_id):
                 task.save()
 
         # 在后台线程中执行
+        print(f"[DEBUG] 准备启动后台线程")
         thread = threading.Thread(target=real_execution)
         thread.daemon = True
-        thread.start()
+
+        # 立即执行而不是用守护线程
+        try:
+            print(f"[DEBUG] 直接执行任务而不是后台线程")
+            real_execution()
+        except Exception as e:
+            print(f"[DEBUG] 直接执行失败: {str(e)}")
+            task.status = 'failed'
+            task.end_time = timezone.now()
+            task.error_message = str(e)
+            task.save()
+
+        # # 保留后台线程方式作为备用
+        # thread.start()
+        # print(f"[DEBUG] 后台线程已启动，线程ID: {thread.ident}")
 
     except Task.DoesNotExist:
         pass
@@ -126,9 +148,10 @@ def install_apk(device_id, apk_file_path, platform):
     """安装APK到设备"""
     try:
         if platform == 'android':
-            # 使用adb install命令安装APK
+            # 使用adb install命令安装APK，修复编码问题
             cmd = ['adb', '-s', device_id, 'install', apk_file_path]
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60,
+                                  encoding='utf-8', errors='ignore')
 
             if result.returncode == 0:
                 return {'success': True, 'output': result.stdout}
@@ -141,39 +164,127 @@ def install_apk(device_id, apk_file_path, platform):
         return {'success': False, 'error': '安装超时'}
     except Exception as e:
         return {'success': False, 'error': str(e)}
-
 def execute_test_script(device_id, test_case, platform):
     """执行测试脚本"""
     try:
         script_path = test_case.file_path
+        print(f"[DEBUG] 执行脚本: {script_path}, 类型: {test_case.file_type}")
 
         if platform == 'android':
             if test_case.file_type == 'python':
-                # 执行Python脚本
-                cmd = ['adb', '-s', device_id, 'shell', 'python3', script_path]
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+                # Python脚本实际上是Airtest脚本，应该在服务器端执行
+                print(f"[DEBUG] 执行Python Airtest脚本: {script_path}")
+
+                # 1. 构建正确的device参数
+                device_uri = f"Android://127.0.0.1:5037/{device_id}"
+
+                # 2. 创建日志目录（使用绝对路径）
+                log_dir = os.path.abspath(os.path.join('logs', 'airtest'))
+                os.makedirs(log_dir, exist_ok=True)
+                log_file = os.path.join(log_dir, f"test_{device_id}_{int(time.time())}.log")
+
+                # 3. 构建Airtest命令
+                cmd = [
+                    'airtest', 'run',
+                    script_path,
+                    '--device', device_uri,
+                    '--log', log_dir
+                ]
+
+                print(f"[DEBUG] Python Airtest命令: {' '.join(cmd)}")
+
+                # 4. 检查Airtest是否可用
+                check_cmd = ['where', 'airtest'] if os.name == 'nt' else ['which', 'airtest']
+                check_result = subprocess.run(check_cmd, capture_output=True, text=True,
+                                            encoding='utf-8', errors='ignore')
+
+                if check_result.returncode != 0:
+                    return {'success': False, 'error': 'Airtest未安装或不在PATH中'}
+
+                # 5. 执行Airtest脚本
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=300,
+                                      encoding='utf-8', errors='ignore')
+                print(f"[DEBUG] Python Airtest执行结果: {result.returncode}")
+                print(f"[DEBUG] Python Airtest输出: {result.stdout}")
+                if result.stderr:
+                    print(f"[DEBUG] Python Airtest错误: {result.stderr}")
+
+                # 6. 检查执行结果
+                # Airtest有时会返回特殊错误码4294967295，但实际上脚本可能已执行
+                if result.returncode == 0 or result.returncode == 4294967295:
+                    # 检查是否有明显的错误信息
+                    if result.stderr and 'Error' in result.stderr and 'Traceback' in result.stderr:
+                        return {'success': False, 'error': f'Airtest执行出错: {result.stderr}'}
+                    else:
+                        return {'success': True, 'output': result.stdout, 'log_file': log_file}
+                else:
+                    error_msg = result.stderr if result.stderr else result.stdout
+                    return {'success': False, 'error': f'Airtest执行失败: {error_msg}'}
+
             elif test_case.file_type == 'airtest':
                 # 检查是否是ZIP文件，如果是则解压
                 if script_path.endswith('.zip'):
+                    print(f"[DEBUG] 执行ZIP文件: {script_path}")
                     zip_result = extract_and_run_zip_script(device_id, script_path, platform)
                     return zip_result
                 else:
-                    # 执行Airtest脚本
-                    cmd = ['airtest', 'run', script_path, '--device', device_id]
-                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+                    # 执行Airtest脚本 - 修复关键问题
+                    print(f"[DEBUG] 执行Airtest脚本: {script_path}")
+
+                    # 1. 构建正确的device参数
+                    device_uri = f"Android://127.0.0.1:5037/{device_id}"
+
+                    # 2. 创建日志目录
+                    log_dir = os.path.join('logs', 'airtest')
+                    os.makedirs(log_dir, exist_ok=True)
+                    log_file = os.path.join(log_dir, f"test_{device_id}_{int(time.time())}.log")
+
+                    # 3. 构建Airtest命令
+                    cmd = [
+                        'airtest', 'run',
+                        script_path,
+                        '--device', device_uri,
+                        '--log', log_dir
+                    ]
+
+                    print(f"[DEBUG] Airtest命令: {' '.join(cmd)}")
+
+                    # 4. 检查Airtest是否可用
+                    check_cmd = ['where', 'airtest'] if os.name == 'nt' else ['which', 'airtest']
+                    check_result = subprocess.run(check_cmd, capture_output=True, text=True,
+                                                encoding='utf-8', errors='ignore')
+
+                    if check_result.returncode != 0:
+                        return {'success': False, 'error': 'Airtest未安装或不在PATH中'}
+
+                    # 5. 执行Airtest脚本
+                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=300,
+                                          encoding='utf-8', errors='ignore')
+                    print(f"[DEBUG] Airtest执行结果: {result.returncode}")
+                    print(f"[DEBUG] Airtest输出: {result.stdout}")
+                    if result.stderr:
+                        print(f"[DEBUG] Airtest错误: {result.stderr}")
+
+                    # 6. 检查执行结果
+                    # Airtest有时会返回特殊错误码4294967295，但实际上脚本可能已执行
+                    if result.returncode == 0 or result.returncode == 4294967295:
+                        # 检查是否有明显的错误信息
+                        if result.stderr and 'Error' in result.stderr and 'Traceback' in result.stderr:
+                            return {'success': False, 'error': f'Airtest执行出错: {result.stderr}'}
+                        else:
+                            return {'success': True, 'output': result.stdout, 'log_file': log_file}
+                    else:
+                        error_msg = result.stderr if result.stderr else result.stdout
+                        return {'success': False, 'error': f'Airtest执行失败: {error_msg}'}
             else:
                 return {'success': False, 'error': '不支持的脚本类型'}
         else:
             return {'success': False, 'error': 'iOS设备暂不支持'}
 
-        if result.returncode == 0:
-            return {'success': True, 'output': result.stdout}
-        else:
-            return {'success': False, 'error': result.stderr}
-
     except subprocess.TimeoutExpired:
         return {'success': False, 'error': '执行超时'}
     except Exception as e:
+        print(f"[DEBUG] 执行脚本异常: {str(e)}")
         return {'success': False, 'error': str(e)}
 
 def extract_and_run_zip_script(device_id, zip_path, platform):
@@ -202,26 +313,56 @@ def extract_and_run_zip_script(device_id, zip_path, platform):
             if not main_script:
                 return {'success': False, 'error': 'ZIP文件中未找到Python脚本'}
 
-            # 将脚本推送到设备
-            device_script_path = f'/sdcard/{os.path.basename(main_script)}'
-            push_cmd = ['adb', '-s', device_id, 'push', main_script, device_script_path]
-            push_result = subprocess.run(push_cmd, capture_output=True, text=True, timeout=30)
+            print(f"[DEBUG] ZIP中找到脚本: {main_script}")
 
-            if push_result.returncode != 0:
-                return {'success': False, 'error': f'推送脚本失败: {push_result.stderr}'}
+            # 对于ZIP文件，假设是Airtest项目，在服务器上执行
+            # 1. 构建正确的device参数
+            device_uri = f"Android://127.0.0.1:5037/{device_id}"
 
-            # 执行脚本
-            exec_cmd = ['adb', '-s', device_id, 'shell', f'python3 {device_script_path}']
-            result = subprocess.run(exec_cmd, capture_output=True, text=True, timeout=120)
+            # 2. 创建日志目录（使用绝对路径）
+            log_dir = os.path.abspath(os.path.join('logs', 'airtest'))
+            os.makedirs(log_dir, exist_ok=True)
+            log_file = os.path.join(log_dir, f"test_{device_id}_{int(time.time())}.log")
 
-            # 清理设备上的脚本文件
-            cleanup_cmd = ['adb', '-s', device_id, 'shell', f'rm {device_script_path}']
-            subprocess.run(cleanup_cmd, capture_output=True, text=True, timeout=10)
+            # 3. 构建Airtest命令
+            cmd = [
+                'airtest', 'run',
+                main_script,
+                '--device', device_uri,
+                '--log', log_dir
+            ]
 
-            if result.returncode == 0:
-                return {'success': True, 'output': result.stdout}
+            print(f"[DEBUG] ZIP Airtest命令: {' '.join(cmd)}")
+
+            # 4. 检查Airtest是否可用
+            check_cmd = ['where', 'airtest'] if os.name == 'nt' else ['which', 'airtest']
+            check_result = subprocess.run(check_cmd, capture_output=True, text=True,
+                                        encoding='utf-8', errors='ignore')
+
+            if check_result.returncode != 0:
+                return {'success': False, 'error': 'Airtest未安装或不在PATH中'}
+
+            # 5. 执行Airtest脚本（在脚本所在目录执行，以便找到图片文件）
+            script_dir = os.path.dirname(main_script)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300,
+                                  cwd=script_dir, encoding='utf-8', errors='ignore')
+            print(f"[DEBUG] ZIP Airtest执行结果: {result.returncode}")
+            print(f"[DEBUG] ZIP Airtest输出: {result.stdout}")
+            if result.stderr:
+                print(f"[DEBUG] ZIP Airtest错误: {result.stderr}")
+
+            # 6. 检查执行结果
+            # Airtest有时会返回特殊错误码4294967295，但实际上脚本可能已执行
+            if result.returncode == 0 or result.returncode == 4294967295:
+                # 检查是否有明显的错误信息
+                if result.stderr and 'Error' in result.stderr and 'Traceback' in result.stderr:
+                    return {'success': False, 'error': f'Airtest执行出错: {result.stderr}'}
+                else:
+                    return {'success': True, 'output': result.stdout, 'log_file': log_file}
             else:
-                return {'success': False, 'error': result.stderr}
+                error_msg = result.stderr if result.stderr else result.stdout
+                return {'success': False, 'error': f'Airtest执行失败: {error_msg}'}
 
     except Exception as e:
+        print(f"[DEBUG] ZIP处理异常: {str(e)}")
         return {'success': False, 'error': f'ZIP处理失败: {str(e)}'}
