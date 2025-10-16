@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}编辑测试用例{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'cases/css/cases.css' %}">
+{% endblock %}
+
+{% block banner %}
+<section class="banner">
+    <h1>编辑测试用例</h1>
+</section>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg rounded-4">
+                <div class="card-header border-0 bg-white py-3">
+                    <h5 class="card-title mb-0 text-primary">编辑测试用例</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="editForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">脚本名称 <span class="text-danger">*</span></label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.status.id_for_label }}" class="form-label">状态 <span class="text-danger">*</span></label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.status.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">文件信息</label>
+                            <div class="p-3 bg-light rounded">
+                                <p class="mb-1"><strong>文件类型：</strong> {{ test_case.get_file_type_display }}</p>
+                                <p class="mb-1"><strong>文件大小：</strong> {{ test_case.get_file_size_display }}</p>
+                                <p class="mb-0"><strong>上传时间：</strong> {{ test_case.upload_time|date:"Y/m/d H:i:s" }}</p>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer border-0 bg-white">
+                    <a href="{% url 'cases:case_list' %}" class="btn btn-secondary rounded-pill px-3">取消</a>
+                    <button type="submit" form="editForm" class="btn btn-primary rounded-pill px-3" id="saveBtn">
+                        <span id="saveBtnText">保存</span>
+                        <span id="saveSpinner" class="spinner-border spinner-border-sm d-none" role="status">
+                            <span class="visually-hidden">保存中...</span>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const editForm = document.getElementById('editForm');
+    const saveBtn = document.getElementById('saveBtn');
+    const saveBtnText = document.getElementById('saveBtnText');
+    const saveSpinner = document.getElementById('saveSpinner');
+
+    editForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // 显示保存状态
+        saveBtn.disabled = true;
+        saveBtnText.textContent = '保存中...';
+        saveSpinner.classList.remove('d-none');
+
+        const formData = new FormData(editForm);
+
+        fetch('{% url "cases:edit_test_case" test_case.id %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert(data.message, 'success');
+
+                // 更新页面上的显示信息
+                setTimeout(() => {
+                    window.location.href = '{% url "cases:case_list" %}';
+                }, 1500);
+            } else {
+                showAlert(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('保存失败，请重试', 'danger');
+        })
+        .finally(() => {
+            // 恢复按钮状态
+            saveBtn.disabled = false;
+            saveBtnText.textContent = '保存';
+            saveSpinner.classList.add('d-none');
+        });
+    });
+
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-50 start-50 translate-middle`;
+        alertDiv.style.zIndex = '9999';
+        alertDiv.style.minWidth = '300px';
+        alertDiv.style.textAlign = 'center';
+        alertDiv.innerHTML = `
+            ${message}
+        `;
+        document.body.appendChild(alertDiv);
+
+        // 4秒后自动移除提示
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.classList.remove('show');
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.parentNode.removeChild(alertDiv);
+                    }
+                }, 150);
+            }
+        }, 4000);
+    }
+});
+</script>
+{% endblock %}

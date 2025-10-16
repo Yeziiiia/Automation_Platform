@@ -1,0 +1,55 @@
+<!-- 运行测试用例弹窗 -->
+<div class="modal fade" id="runModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content shadow-lg rounded-4">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-primary">运行测试用例</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+      </div>
+      <form method="post" enctype="multipart/form-data" id="runForm">
+        {% csrf_token %}
+        <input type="hidden" id="runCaseId" name="case_id">
+        <div class="modal-body">
+          <!-- 测试用例信息 -->
+          <div class="mb-3">
+            <label class="form-label">测试用例信息</label>
+            <div class="p-3 bg-light rounded">
+              <p class="mb-1"><strong>脚本名称：</strong> <span id="runCaseName"></span></p>
+              <p class="mb-1"><strong>文件类型：</strong> <span id="runCaseType"></span></p>
+              <p class="mb-1"><strong>文件大小：</strong> <span id="runCaseSize"></span></p>
+              <p class="mb-0"><strong>上传时间：</strong> <span id="runCaseTime"></span></p>
+            </div>
+          </div>
+
+          <!-- 应用文件上传 -->
+          <div class="mb-3">
+            <label for="runAppFile" class="form-label">选择应用文件 <span class="text-danger">*</span></label>
+            <input type="file" class="form-control" id="runAppFile" name="app_file"
+                   accept=".apk,.ipa" required>
+            <div class="form-text">支持 APK 文件 (.apk) 或 IPA 文件 (.ipa)</div>
+            <div id="runAppFileError" class="text-danger small mt-1 d-none"></div>
+          </div>
+
+          <!-- 设备选择 -->
+          <div class="mb-3">
+            <label class="form-label">选择测试设备 <span class="text-danger">*</span></label>
+            <div id="runDeviceList" class="device-list">
+              <!-- 设备列表将通过JavaScript动态生成 -->
+            </div>
+            <div class="form-text">请至少选择一个在线设备进行测试</div>
+            <div id="runDeviceError" class="text-danger small mt-1 d-none"></div>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-secondary rounded-pill px-3" data-bs-dismiss="modal">取消</button>
+          <button type="submit" class="btn btn-primary rounded-pill px-3" id="runBtn">
+            <span id="runBtnText">确认运行</span>
+            <span id="runSpinner" class="spinner-border spinner-border-sm d-none" role="status">
+              <span class="visually-hidden">运行中...</span>
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

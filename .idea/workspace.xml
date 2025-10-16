@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="07e61244-add9-4d5a-8b35-0881944b7257" name="更改" comment="增加了运行用例弹窗 / 运行会安装APK ， 但是还不能执行用例">
+    <list default="true" id="07e61244-add9-4d5a-8b35-0881944b7257" name="更改" comment="新增用例执行， 支持Airtest脚本运行，也允许使用ZIP ； 修复若干bug">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tasks/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/tasks/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,7 +49,6 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "codeReviewSummary": "[]",
     "django.template.preview.state": "SHOW_EDITOR_AND_PREVIEW",
     "git-widget-placeholder": "master",
     "node.js.detected.package.eslint": "true",
@@ -59,7 +56,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -107,7 +104,10 @@
       <updated>1760496219916</updated>
       <workItem from="1760496221581" duration="6578000" />
       <workItem from="1760509820924" duration="21816000" />
-      <workItem from="1760534325344" duration="5689000" />
+      <workItem from="1760534325344" duration="5805000" />
+      <workItem from="1760584697131" duration="118000" />
+      <workItem from="1760584833549" duration="170000" />
+      <workItem from="1760585037056" duration="552000" />
     </task>
     <task id="LOCAL-00001" summary="第一次upload">
       <option name="closed" value="true" />
@@ -173,7 +173,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760531320682</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="新增用例执行， 支持Airtest脚本运行，也允许使用ZIP ； 修复若干bug">
+      <option name="closed" value="true" />
+      <created>1760578058269</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1760578058269</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -186,6 +194,7 @@
     <MESSAGE value="删除模拟数据" />
     <MESSAGE value="增加上传用例 / 编辑 / 删除 / 真机设备识别" />
     <MESSAGE value="增加了运行用例弹窗 / 运行会安装APK ， 但是还不能执行用例" />
-    <option name="LAST_COMMIT_MESSAGE" value="增加了运行用例弹窗 / 运行会安装APK ， 但是还不能执行用例" />
+    <MESSAGE value="新增用例执行， 支持Airtest脚本运行，也允许使用ZIP ； 修复若干bug" />
+    <option name="LAST_COMMIT_MESSAGE" value="新增用例执行， 支持Airtest脚本运行，也允许使用ZIP ； 修复若干bug" />
   </component>
 </project>
