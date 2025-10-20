@@ -45,11 +45,31 @@ class Task(models.Model):
         """运行时间"""
         if self.start_time and self.end_time:
             delta = self.end_time - self.start_time
-            return f"{delta.seconds // 3600}小时{(delta.seconds % 3600) // 60}分"
+            total_seconds = delta.total_seconds()
+            if total_seconds < 60:
+                return f"{int(total_seconds)}秒"
+            elif total_seconds < 3600:
+                minutes = int(total_seconds // 60)
+                seconds = int(total_seconds % 60)
+                return f"{minutes}分{seconds}秒"
+            else:
+                hours = int(total_seconds // 3600)
+                minutes = int((total_seconds % 3600) // 60)
+                return f"{hours}小时{minutes}分"
         elif self.start_time:
             delta = timezone.now() - self.start_time
-            return f"{delta.seconds // 3600}小时{(delta.seconds % 3600) // 60}分"
-        return "0小时0分"
+            total_seconds = delta.total_seconds()
+            if total_seconds < 60:
+                return f"{int(total_seconds)}秒"
+            elif total_seconds < 3600:
+                minutes = int(total_seconds // 60)
+                seconds = int(total_seconds % 60)
+                return f"{minutes}分{seconds}秒"
+            else:
+                hours = int(total_seconds // 3600)
+                minutes = int((total_seconds % 3600) // 60)
+                return f"{hours}小时{minutes}分"
+        return "0秒"
 
     @property
     def device_count(self):

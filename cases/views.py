@@ -246,7 +246,7 @@ def run_test_case(request, case_id):
 
                 # 创建任务
                 task = Task.objects.create(
-                    name=f"{test_case.name} - {app_file.name}",
+                    name=test_case.name,  # 只使用用例标题
                     test_case=test_case,
                     devices=selected_devices,
                     app_file=app_file_path,

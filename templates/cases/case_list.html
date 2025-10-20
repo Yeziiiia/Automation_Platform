@@ -481,20 +481,20 @@ document.addEventListener('DOMContentLoaded', function() {
         runModal.hide();
         showAlert(data.message, 'success');
 
-        // 跳转到任务运行页面
-        setTimeout(() => {
-          window.location.href = data.redirect_url || '/tasks/';
-        }, 1500);
+        // 立即跳转到任务运行页面，不需要等待
+        window.location.href = data.redirect_url || '/tasks/';
       } else {
         showAlert(data.message, 'danger');
+        // 只有失败时才恢复按钮状态
+        runBtn.disabled = false;
+        runBtnText.textContent = '确认运行';
+        runSpinner.classList.add('d-none');
       }
     })
     .catch(error => {
       console.error('Error:', error);
       showAlert('创建任务失败，请重试', 'danger');
-    })
-    .finally(() => {
-      // 恢复按钮状态
+      // 只有失败时才恢复按钮状态
       runBtn.disabled = false;
       runBtnText.textContent = '确认运行';
       runSpinner.classList.add('d-none');

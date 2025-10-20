@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import JsonResponse
 from .models import Task, TaskDeviceResult
 import subprocess
 import threading
@@ -14,7 +15,7 @@ def running_tasks(request):
     all_tasks = Task.objects.all().order_by('-created_time')
 
     # 分页处理
-    paginator = Paginator(all_tasks, 8)  # 每页显示8条
+    paginator = Paginator(all_tasks, 15)  # 每页显示15条
     page = request.GET.get('page', 1)
 
     try:
@@ -101,8 +102,19 @@ def execute_task_async(task_id):
                         device_result.error_message = str(e)
                         device_result.save()
 
-                # 更新任务状态
-                task.status = 'success'
+                # 检查所有设备的执行结果，决定任务最终状态
+                failed_count = 0
+                for device_id, device_result in device_results.items():
+                    if device_result.status == 'failed':
+                        failed_count += 1
+
+                # 如果有设备失败，任务状态为失败；否则为成功
+                if failed_count > 0:
+                    task.status = 'failed'
+                    task.error_message = f"有 {failed_count} 个设备执行失败"
+                else:
+                    task.status = 'success'
+
                 task.end_time = timezone.now()
                 task.progress = 100
                 task.save()
@@ -126,20 +138,9 @@ def execute_task_async(task_id):
         thread = threading.Thread(target=real_execution)
         thread.daemon = True
 
-        # 立即执行而不是用守护线程
-        try:
-            print(f"[DEBUG] 直接执行任务而不是后台线程")
-            real_execution()
-        except Exception as e:
-            print(f"[DEBUG] 直接执行失败: {str(e)}")
-            task.status = 'failed'
-            task.end_time = timezone.now()
-            task.error_message = str(e)
-            task.save()
-
-        # # 保留后台线程方式作为备用
-        # thread.start()
-        # print(f"[DEBUG] 后台线程已启动，线程ID: {thread.ident}")
+        # 在后台线程中执行任务，确保立即返回响应
+        thread.start()
+        print(f"[DEBUG] 后台线程已启动，线程ID: {thread.ident}")
 
     except Task.DoesNotExist:
         pass
@@ -366,3 +367,103 @@ def extract_and_run_zip_script(device_id, zip_path, platform):
     except Exception as e:
         print(f"[DEBUG] ZIP处理异常: {str(e)}")
         return {'success': False, 'error': f'ZIP处理失败: {str(e)}'}
+
+def get_task_status(request, task_id):
+    """获取任务状态的API"""
+    try:
+        task = Task.objects.get(id=task_id)
+
+        # 获取设备结果统计
+        device_results = task.device_results.all()
+        device_stats = {
+            'total': device_results.count(),
+            'pending': device_results.filter(status='pending').count(),
+            'running': device_results.filter(status='running').count(),
+            'success': device_results.filter(status='success').count(),
+            'failed': device_results.filter(status='failed').count(),
+        }
+
+        # 计算进度
+        if task.status == 'running':
+            # 根据设备完成情况计算进度
+            completed_devices = device_stats['success'] + device_stats['failed']
+            if device_stats['total'] > 0:
+                base_progress = (completed_devices / device_stats['total']) * 80
+                # 加上运行中设备的基础进度
+                running_progress = (device_stats['running'] / device_stats['total']) * 40
+                task.progress = min(90, int(base_progress + running_progress))
+            else:
+                task.progress = min(90, task.progress + 5)  # 缓慢增长
+            task.save()
+
+        return JsonResponse({
+            'success': True,
+            'task': {
+                'id': task.id,
+                'name': task.name,
+                'status': task.status,
+                'status_display': task.get_status_display(),
+                'progress': task.progress,
+                'runtime': task.runtime,
+                'device_count': task.device_count,
+                'device_stats': device_stats,
+                'created_time': task.created_time.strftime('%Y/%m/%d %H:%M:%S'),
+                'start_time': task.start_time.strftime('%Y/%m/%d %H:%M:%S') if task.start_time else None,
+                'end_time': task.end_time.strftime('%Y/%m/%d %H:%M:%S') if task.end_time else None,
+                'error_message': task.error_message
+            }
+        })
+    except Task.DoesNotExist:
+        return JsonResponse({'success': False, 'message': '任务不存在'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+def get_all_tasks_status(request):
+    """获取所有任务状态的API"""
+    try:
+        tasks = Task.objects.all().order_by('-created_time')
+        tasks_data = []
+
+        for task in tasks:
+            # 获取设备结果统计
+            device_results = task.device_results.all()
+            device_stats = {
+                'total': device_results.count(),
+                'pending': device_results.filter(status='pending').count(),
+                'running': device_results.filter(status='running').count(),
+                'success': device_results.filter(status='success').count(),
+                'failed': device_results.filter(status='failed').count(),
+            }
+
+            # 更新运行中任务的进度
+            if task.status == 'running':
+                completed_devices = device_stats['success'] + device_stats['failed']
+                if device_stats['total'] > 0:
+                    base_progress = (completed_devices / device_stats['total']) * 80
+                    running_progress = (device_stats['running'] / device_stats['total']) * 40
+                    task.progress = min(90, int(base_progress + running_progress))
+                else:
+                    task.progress = min(90, task.progress + 2)  # 缓慢增长
+                task.save()
+
+            tasks_data.append({
+                'id': task.id,
+                'name': task.name,
+                'status': task.status,
+                'status_display': task.get_status_display(),
+                'progress': task.progress,
+                'runtime': task.runtime,
+                'device_count': task.device_count,
+                'device_stats': device_stats,
+                'created_time': task.created_time.strftime('%Y/%m/%d %H:%M:%S'),
+                'start_time': task.start_time.strftime('%Y/%m/%d %H:%M:%S') if task.start_time else None,
+                'end_time': task.end_time.strftime('%Y/%m/%d %H:%M:%S') if task.end_time else None,
+                'error_message': task.error_message
+            })
+
+        return JsonResponse({
+            'success': True,
+            'tasks': tasks_data
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)

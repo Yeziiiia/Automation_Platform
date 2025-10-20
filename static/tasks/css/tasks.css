@@ -1,18 +1,67 @@
-/* tasks 模块柔和现代化样式 */
+/* ==============================
+   tasks 模块柔和现代化样式
+   ============================== */
 .task-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 24px;
+    padding: 0;
+    width: 100%;
 }
 
+/* 大屏幕（≥1400px）：强制固定5列，确保横向一行显示5个卡片 */
+@media (min-width: 1400px) {
+    .task-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 28px;
+    }
+}
+
+/* 中等屏幕（1200px-1399px）：自适应，但通过minmax限制最多5列 */
+@media (min-width: 1200px) and (max-width: 1399px) {
+    .task-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+    }
+}
+
+/* 平板屏幕（768px-1199px）：自适应，最多4列 */
+@media (min-width: 768px) and (max-width: 1199px) {
+    .task-grid {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+    }
+}
+
+/* 小屏幕（≤767px）：自适应，最多2-3列 */
+@media (max-width: 767px) {
+    .task-grid {
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 16px;
+    }
+}
+
+/* 超小屏幕（≤480px）：强制1列 */
+@media (max-width: 480px) {
+    .task-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
+/* ------------------------------
+   任务卡片基础样式
+------------------------------- */
 .task-card {
     background: var(--card-bg);
     border-radius: var(--radius);
     box-shadow: var(--shadow-sm);
-    padding: 24px;
+    padding: 28px 24px;
     display: flex;
     flex-direction: column;
     transition: box-shadow .2s;
+    min-height: 280px;
+    max-width: none;
 }
 
 .task-card:hover {
@@ -22,28 +71,177 @@
 .task-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+    gap: 12px;
 }
 
 .task-name {
     font-weight: 600;
-    font-size: 16px;
+    font-size: 18px;
     color: var(--text);
+    flex: 1;
+    line-height: 1.4;
+    word-break: break-word;
 }
 
 .task-status {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    margin-left: 8px;
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+/* 状态样式 */
+.task-status.pending {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    color: #856404;
+    border: 1px solid #ffeaa7;
 }
 
 .task-status.running {
-    background: #d4edda;
-    color: var(--success);
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    color: #ffffff;
+    border: 1px solid #0984e3;
+    position: relative;
+    animation: runningPulse 2s ease-in-out infinite;
 }
 
+.task-status.running::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: runningShimmer 1.5s ease-in-out infinite;
+}
+
+.task-status.running::after {
+    content: '⚡';
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+    animation: lightning 0.8s ease-in-out infinite alternate;
+}
+
+.task-status.success {
+    background: linear-gradient(135deg, #00b894, #00cec9);
+    color: #ffffff;
+    border: 1px solid #00b894;
+    position: relative;
+    animation: successBounce 0.6s ease-out;
+}
+
+.task-status.success::before {
+    content: '✓';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    font-size: 10px;
+}
+
+.task-status.failed {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: #ffffff;
+    border: 1px solid #ff6b6b;
+    position: relative;
+    animation: failureShake 0.5s ease-in-out, failureGlow 2s ease-in-out infinite alternate;
+}
+
+.task-status.failed::before {
+    content: '⚠';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    font-size: 10px;
+}
+
+.task-status.failed::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24, #ff6b6b);
+    border-radius: 14px;
+    z-index: -1;
+    animation: failureBorder 3s linear infinite;
+    opacity: 0.6;
+}
+
+.task-status.cancelled {
+    background: linear-gradient(135deg, #b2bec3, #636e72);
+    color: #ffffff;
+    border: 1px solid #b2bec3;
+}
+
+.task-status.running,
+.task-status.success,
+.task-status.failed {
+    padding-left: 22px;
+    padding-right: 22px;
+}
+
+/* ------------------------------
+   动画定义
+------------------------------- */
+@keyframes runningPulse {
+    0%, 100% { box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 0 0 rgba(9,132,227,0.4); }
+    50% { box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 0 8px rgba(9,132,227,0); }
+}
+
+@keyframes runningShimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+@keyframes lightning {
+    0% { opacity: 0.3; transform: translateY(-50%) scale(0.8); }
+    100% { opacity: 1; transform: translateY(-50%) scale(1.2); }
+}
+
+@keyframes successBounce {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes failureShake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+    20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+@keyframes failureGlow {
+    0% { box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 10px rgba(255,107,107,0.3); }
+    100% { box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 20px rgba(255,107,107,0.6); }
+}
+
+@keyframes failureBorder {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ------------------------------
+   进度条 &信息
+------------------------------- */
 .task-info p {
     margin: 4px 0;
     color: var(--muted);
@@ -60,8 +258,24 @@
 
 .progress {
     height: 100%;
-    background: var(--success);
-    transition: width .3s ease;
+    background: linear-gradient(90deg, var(--primary), #5cb3cc);
+    border-radius: 4px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.progress::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
 .btn-block {
